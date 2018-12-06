@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta name="viewport" content="initial-scale=1">
+    <script src='{{url_for("static", filename="moment.min.js")}}'></script>
+    <script src='{{url_for("static", filename="Chart.min.js")}}'></script>
+    <link rel="stylesheet" href='{{url_for("static", filename="style.css")}}'>
+    <meta charset="utf-8">
+
+    <title>What Temperature is it in My Apartment</title>
+
+  </head>
+  <body>
+
+    <center>
+    <h1>What Temperature is it in My Apartment?</h1>
+
+    <h2>
+      {{fahrenheit}}&deg;F
+      as of
+      {{last_update.strftime('%I:%M %p')}} (US/Eastern)
+    </h2>
+    </center>
+
+    <div id="chart-container">
+      <canvas id="line-chart" width="800" height="450"></canvas>
+    </div>
+
+    <div id=info>
+      <p>
+        I live in Brooklyn and it's cold in my apartment.
+        Per <a href="https://www1.nyc.gov/nyc-resources/service/1815/residential-heat-and-hot-water-requirements">NYC law</a>:
+      </p>
+
+      <blockquote>
+        <p>
+          The period between October 1 and May 31 is Heat Season. During this
+          time, the City requires building owners to provide tenants with heat
+          according to the following rules:
+        </p>
+        <ul>
+          <li>
+            Between 6 AM and 10 PM, if the outside temperature falls below 55
+            degrees, the inside temperature must be at least 68 degrees
+            Fahrenheit.
+          </li>
+          <li>Between 10 PM and 6 AM, the inside temperature must be at least
+            62 degrees Fahrenheit at all times. There is no outside temperature
+            requirement.
+          </li>
+        </ul>
+      </blockquote>
+
+      <p>
+        I constantly feel like it is cooler than 68&deg; in my apartment,
+        though it's probably rarely cooler than 62&deg;.
+      </p>
+
+      <p>
+        I want some hard data to bring to my building's management so that they
+        might <i>turn up the heat</i>.
+
+        So I hooked up a Raspberry Pi with a temperature sensor to record the
+        temperature every minute. This page is a view into those data.
+      </p>
+
+      <h3>More Info</h3>
+
+        <h4>Where is the sensor?</h4>
+          <p>
+            It's on the floor of my office. Not close to the radiator but also
+            not close to the window. I might throw it in a cardboard
+            box and put it somewhere more out-of-the-way.
+          </p>
+
+        <h4>How did you build it?</h4>
+        <p>
+          I followed a few guides.
+        </p>
+
+        <ul>
+          <li>
+            Some of "<a href="https://www.hackster.io/timfernando/a-raspberry-pi-thermometer-you-can-access-anywhere-33061c">A Raspberry Pi Thermometer you can Access Anywhere</a>".
+          </li>
+          <li>
+            Some of "<a href="https://opensource.com/article/17/10/set-postgres-database-your-raspberry-pi">How to set up a Postgres database on a Raspberry Pi</a>".
+          </li>
+        </ul>
+        <p>
+
+          But I made some departures from each guide that i did not specifically
+          keep track of.
+
+          In particular I found the circuit in the thermometer guide did not work
+          and so I used <a href="https://pimylifeup.com/raspberry-pi-temperature-sensor/">
+          this one</a> instead.
+        </p>
+
+
+    </div>
+
+
+
+
+
+  </body>
+  <script type="text/javascript">
+    var temps = {{temps | tojson | safe}}
+    var dttms = {{dttms | tojson | safe}}
+    var reqs = {{reqs | tojson | safe}}
+
+    // dttms = dttms.map(Date.parse)
+    new Chart(document.getElementById("line-chart"), {
+      type: 'line',
+      data: {
+        labels: dttms,
+        datasets: [
+          {
+            data: temps,
+            label: "Degrees Fahrenheit",
+            borderColor: "#c45850",
+            borderWidth: 2,
+            // fill: false
+          },
+
+          {
+            data: reqs,
+            label: "Minimum Required Temperature",
+            borderColor: 'rgba(0, 0, 0, 0.1)',
+            fill: false,
+            borderDash: [10,5]
+
+          },
+        ]
+      },
+      options: {
+        tooltips: {
+               enabled: false
+          },
+        scales: {
+           xAxes: [{
+               type: 'time',
+             }],
+           yAxes: [{
+             ticks: {
+               max : Math.ceil(Math.max(73, Math.max.apply(null, temps))),
+               min : Math.floor(Math.min(60, Math.min.apply(null, temps))),
+             },
+             scaleLabel: {
+                display: true,
+                labelString: 'Degrees Fahrenheit'
+              }
+           }]
+         },
+        elements: { point: { radius: 0 } },
+      }
+    });
+  </script>
+</html>
