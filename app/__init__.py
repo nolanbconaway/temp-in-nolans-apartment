@@ -60,7 +60,7 @@ def temp_requirements(dttm):
     """
     if dttm.date().month < 10 and dttm.date().month > 5:
         return None
-    if dttm.time().hour < 6 or dttm.time().hour > 22:
+    if dttm.time().hour < 6 or dttm.time().hour > 21:
         return 62
     else:
         return 68
