@@ -4,8 +4,7 @@ from flask import redirect
 from flask import url_for
 
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import extract
-from sqlalchemy import func as sqfunc
+import sqlalchemy.exc
 
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -28,18 +27,9 @@ limiter = Limiter(
 )
 
 
-# context
-@app.context_processor
-def inject():
-    latest = Snapshot.query.order_by(Snapshot.dttm_utc.desc()).first()
-    return dict(
-        fahrenheit=int(round(latest.fahrenheit)),
-        last_update=utc_to_nyc(latest.dttm_utc)
-    )
-
-
 class Snapshot(db.Model):
     """Snapshot data model."""
+
     __tablename__ = 'snapshots'
     id = db.Column(db.Integer, primary_key=True)
     dttm_utc = db.Column(db.DateTime)
@@ -76,8 +66,15 @@ def temp_requirements(dttm):
         return 68
 
 
+@app.errorhandler(sqlalchemy.exc.OperationalError)
+def handle_bad_request(e):
+    return render_template('operationalerror.html'), 400
+
+
 @app.route("/")
 def today():
+
+    # get timeseries
     cutoff = datetime.datetime.utcnow() - datetime.timedelta(minutes=1440)
     rows = (
         Snapshot
@@ -86,11 +83,17 @@ def today():
         .order_by(Snapshot.dttm_utc)
         .all()
     )
-
     dttms, temps, reqs = unzip_rows(rows)
+
+    # get latest data
+    latest = Snapshot.query.order_by(Snapshot.dttm_utc.desc()).first()
+
+    # render
     return render_template(
         'base.html',
         dttms=dttms,
         temps=temps,
         reqs=reqs,
+        fahrenheit=int(round(latest.fahrenheit)),
+        last_update=utc_to_nyc(latest.dttm_utc),
     )
