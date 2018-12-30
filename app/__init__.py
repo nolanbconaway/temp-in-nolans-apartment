@@ -50,6 +50,7 @@ def unzip_rows(rows):
     """Handle a sequence of SQL rows and make it useful."""
     dttms, temps = zip(*((utc_to_nyc(i.dttm_utc), i.fahrenheit) for i in rows))
     reqs = list(map(temp_requirements, dttms))
+    temps = [i if i < 100 and i > 40 else None for i in temps]
     return dttms, temps, reqs
 
 
