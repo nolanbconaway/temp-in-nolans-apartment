@@ -92,7 +92,13 @@ def today():
     dttms, temps, reqs = unzip_rows(rows)
 
     # get latest data
-    latest = Snapshot.query.order_by(Snapshot.dttm_utc.desc()).first()
+    latest = (
+        Snapshot.query
+        .filter(Snapshot.fahrenheit < 100)
+        .filter(Snapshot.fahrenheit > 40)
+        .order_by(Snapshot.dttm_utc.desc())
+        .first()
+    )
 
     # render
     return render_template(
