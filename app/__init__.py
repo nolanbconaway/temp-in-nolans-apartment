@@ -54,7 +54,10 @@ def unzip_rows(rows):
             for i, r in enumerate(rows)
 
             # skip the first row and rows with a huge change
-            if i > 0 and abs(r.fahrenheit - rows[i-1].fahrenheit) < 1
+            if i > 0
+            and abs(r.fahrenheit - rows[i-1].fahrenheit) < 1
+            and r.fahrenheit < 80
+            and r.fahrenheit > 40
         )
     )
     reqs = list(map(temp_requirements, dttms))
