@@ -1,6 +1,17 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
   <head>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-80719882-2"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-80719882-2');
+    </script>
+
+
     <meta name="viewport" content="initial-scale=1">
 
     <script src='{{url_for("static", filename="moment.min.js")}}'></script>
@@ -94,9 +105,15 @@
 
         <h3>Where is the sensor?</h3>
           <p>
-            It's on a shelf in the living room. Closer to the the radiator than
-            to the window. The wiring is loose and exposed, so I might throw it
-            in a cardboard box and put it somewhere more out-of-the-way.
+            It used to be on a shelf in the living room, with the wires loose
+            and exposed. I taped down the wires (hooked up with a breadboard)
+            and taped the whole thing to the inside of a cardboard box, then I
+            put the box under the couch.
+          </p>
+          <p>
+            The living room is known to be the warmest room in the house. I
+            think the radiator in that room is the best one we have. The couch
+            is a bit closer to the window than the radiator.
           </p>
 
         <h3>How did you build it?</h3>
