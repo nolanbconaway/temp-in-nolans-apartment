@@ -163,7 +163,6 @@
             label: "Degrees Fahrenheit",
             borderColor: "#c45850",
             borderWidth: 2,
-            // fill: false
           },
 
           {
@@ -178,11 +177,16 @@
       },
       options: {
         tooltips: {
-               enabled: false
+               enabled: true
           },
         scales: {
            xAxes: [{
                type: 'time',
+               time: { tooltipFormat: 'LT'},
+               ticks: {callback: function(value, index, values) {
+                    if (!values[index]) {return}
+                    return moment.utc(values[index]['value']).format('LT');
+                }}
              }],
            yAxes: [{
              ticks: {

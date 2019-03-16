@@ -12,25 +12,24 @@ from flask_limiter.util import get_remote_address
 import pytz
 import datetime
 import os
+
 app = Flask(__name__)
 
 # set up database
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URI']
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ["DATABASE_URI"]
 db = SQLAlchemy(app)
 
 # set up limiter
 limiter = Limiter(
-    app,
-    key_func=get_remote_address,
-    default_limits=["200 per day", "5 per minute"]
+    app, key_func=get_remote_address, default_limits=["200 per day", "5 per minute"]
 )
 
 
 class Snapshot(db.Model):
     """Snapshot data model."""
 
-    __tablename__ = 'snapshots'
+    __tablename__ = "snapshots"
     id = db.Column(db.Integer, primary_key=True)
     dttm_utc = db.Column(db.DateTime)
     fahrenheit = db.Column(db.Float)
@@ -38,11 +37,8 @@ class Snapshot(db.Model):
 
 def utc_to_nyc(utc):
     """Convert a UTC datetime to NYC time."""
-    return (
-        utc
-        .replace(tzinfo=pytz.utc)
-        .astimezone(pytz.timezone('US/Eastern'))
-        .replace(tzinfo=pytz.timezone('US/Eastern'), microsecond=0)
+    return pytz.timezone("US/Eastern").normalize(
+        pytz.timezone("UTC").localize(utc.replace(microsecond=0))
     )
 
 
@@ -52,10 +48,9 @@ def unzip_rows(rows):
         *(
             (utc_to_nyc(r.dttm_utc), r.fahrenheit)
             for i, r in enumerate(rows)
-
             # skip the first row and rows with a huge change
             if i > 0
-            and abs(r.fahrenheit - rows[i-1].fahrenheit) < 1
+            and abs(r.fahrenheit - rows[i - 1].fahrenheit) < 1
             and r.fahrenheit < 80
             and r.fahrenheit > 40
         )
@@ -79,18 +74,17 @@ def temp_requirements(dttm):
 
 @app.errorhandler(sqlalchemy.exc.OperationalError)
 def handle_bad_request(e):
-    return render_template('operationalerror.html'), 400
+    """Handle bad requests."""
+    return render_template("operationalerror.html"), 400
 
 
 @app.route("/")
 def today():
-
+    """Provide the main ui."""
     # get timeseries
     cutoff = datetime.datetime.utcnow() - datetime.timedelta(minutes=1440)
     rows = (
-        Snapshot
-        .query
-        .filter(Snapshot.dttm_utc >= cutoff)
+        Snapshot.query.filter(Snapshot.dttm_utc >= cutoff)
         .order_by(Snapshot.dttm_utc)
         .all()
     )
@@ -98,8 +92,7 @@ def today():
 
     # get latest data
     latest = (
-        Snapshot.query
-        .filter(Snapshot.fahrenheit < 100)
+        Snapshot.query.filter(Snapshot.fahrenheit < 100)
         .filter(Snapshot.fahrenheit > 40)
         .order_by(Snapshot.dttm_utc.desc())
         .first()
@@ -107,7 +100,7 @@ def today():
 
     # render
     return render_template(
-        'base.html',
+        "base.html",
         dttms=dttms,
         temps=temps,
         reqs=reqs,
