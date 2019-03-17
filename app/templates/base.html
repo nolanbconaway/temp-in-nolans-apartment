@@ -197,11 +197,10 @@
         scales: {
            xAxes: [{
                type: 'time',
-               time: { tooltipFormat: 'LT'},
-               ticks: {callback: function(value, index, values) {
-                    if (!values[index]) {return}
-                    return moment.utc(values[index]['value']).format('LT');
-                }}
+               time: {
+                 tooltipFormat: 'LT',
+               },
+               ticks: {},
              }],
            yAxes: [{
              ticks: {
