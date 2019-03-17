@@ -70,25 +70,38 @@ def infer_radiator(rows, timeout=20):
     # get start time. we need 15 mins of data to make the call
     start_utc = rows[0].dttm_utc + datetime.timedelta(minutes=15)
 
-    def temp_at_lower_bound(dttm):
-        """Get the temp at the latest point between 15 and 20 mins ago."""
-        lag15 = dttm - datetime.timedelta(minutes=15)
-        lag20 = dttm - datetime.timedelta(minutes=20)
+    def temp_at_lower_bound(idx):
+        """Get the temp at the latest point between 15 and 20 mins ago.
+
+        For speed, provide the index of the row you want the lower bound for.
+        This will search between that row and the one 25 rows before.
+        We assume the rows are sorted by datetime and I know that we usually get rows
+        per minute so this should work.
+        """
+        lag15 = rows[idx].dttm_utc - datetime.timedelta(minutes=15)
+        lag20 = rows[idx].dttm_utc - datetime.timedelta(minutes=20)
+        lowerbound = 0 if idx < 25 else idx - 25
         return [
-            i.fahrenheit for i in rows if i.dttm_utc >= lag20 and i.dttm_utc <= lag15
+            i.fahrenheit
+            for i in rows[lowerbound:idx]
+            if i.dttm_utc >= lag20 and i.dttm_utc <= lag15
         ][-1]
 
     def mins_elapsed(upper, lower):
         """Get the elapsed minutes between two datetimes."""
         return (upper - lower).total_seconds() / 60
 
+    # figure out if the radiator was on based on X increase over N minutes.
     radiator_on = [
-        i.dttm_utc
-        for i in rows
-        if i.dttm_utc >= start_utc
-        and (i.fahrenheit - temp_at_lower_bound(i.dttm_utc)) > (0.007 * 15)
+        r.dttm_utc
+        for i, r in enumerate(rows)
+        if r.dttm_utc >= start_utc
+        and (r.fahrenheit - temp_at_lower_bound(i)) > (0.007 * 15)
     ]
 
+    # that should result in a few OFF points within an ON zone and vice versa,
+    # since the model is very imperfect. So we need to cluster the ON regions.
+    # I have chosen to delimit based on <timeout> minutes of consecutive OFF.
     limits = []
     for startpoint in radiator_on[:-1]:
 
