@@ -72,11 +72,11 @@ def infer_radiator(rows, timeout=20):
 
     def temp_at_lower_bound(dttm):
         """Get the temp at the latest point between 15 and 20 mins ago."""
-        d15 = dttm - datetime.timedelta(minutes=15)
-        d20 = dttm - datetime.timedelta(minutes=20)
-        return [i for i in rows if i.dttm_utc >= d20 and i.dttm_utc >= d15][
-            -1
-        ].fahrenheit
+        lag15 = dttm - datetime.timedelta(minutes=15)
+        lag20 = dttm - datetime.timedelta(minutes=20)
+        return [
+            i.fahrenheit for i in rows if i.dttm_utc >= lag20 and i.dttm_utc <= lag15
+        ][-1]
 
     def mins_elapsed(upper, lower):
         """Get the elapsed minutes between two datetimes."""
@@ -149,7 +149,7 @@ def today():
         temps=temps,
         reqs=reqs,
         radiator=radiator,
-        radiator_limits=radiator_limits,
+        n_radiators=len(radiator_limits),
         fahrenheit=int(round(latest.fahrenheit)),
         last_update=utc_to_nyc(latest.dttm_utc),
     )

@@ -34,8 +34,8 @@
     </h2>
 
     <h3>
-      The radiator was on {{radiator_limits | length}}
-      time{% if radiator_limits | length != 1 %}s{% endif %}
+      The radiator was on {{n_radiators}}
+      time{% if n_radiators != 1 %}s{% endif %}
       in the last 24 hours.
     </h3>
     </center>
@@ -158,7 +158,6 @@
     var dttms = {{dttms | tojson | safe}}
     var reqs = {{reqs | tojson | safe}}
     var radiator = {{radiator | tojson | safe}}
-    var radiator_limits = {{radiator_limits | tojson | safe}}
     var point_colors = [];
 
     // dttms = dttms.map(Date.parse)
