@@ -32,6 +32,12 @@
       as of
       {{last_update.strftime('%I:%M %p')}} (US/Eastern)
     </h2>
+
+    <h3>
+      The radiator was on {{radiator_limits | length}}
+      time{% if radiator_limits | length != 1 %}s{% endif %}
+      in the last 24 hours.
+    </h3>
     </center>
 
     <div id="chart-container">
@@ -151,9 +157,12 @@
     var temps = {{temps | tojson | safe}}
     var dttms = {{dttms | tojson | safe}}
     var reqs = {{reqs | tojson | safe}}
+    var radiator = {{radiator | tojson | safe}}
+    var radiator_limits = {{radiator_limits | tojson | safe}}
+    var point_colors = [];
 
     // dttms = dttms.map(Date.parse)
-    new Chart(document.getElementById("line-chart"), {
+    var chart = new Chart(document.getElementById("line-chart"), {
       type: 'line',
       data: {
         labels: dttms,
@@ -161,8 +170,11 @@
           {
             data: temps,
             label: "Degrees Fahrenheit",
-            borderColor: "#c45850",
-            borderWidth: 2,
+            // borderColor: "#c45850",
+            borderWidth: 1,
+            pointRadius: 1,
+            pointBackgroundColor: point_colors,
+            pointBorderColor: point_colors,
           },
 
           {
@@ -170,15 +182,19 @@
             label: "Minimum Required Temperature",
             borderColor: 'rgba(0, 0, 0, 0.1)',
             fill: false,
-            borderDash: [10,5]
+            borderDash: [10,5],
+            pointRadius: 0,
 
           },
         ]
       },
       options: {
         tooltips: {
-               enabled: true
-          },
+           enabled: true
+        },
+        legend: {
+            display: false
+         },
         scales: {
            xAxes: [{
                type: 'time',
@@ -199,8 +215,17 @@
               }
            }]
          },
-        elements: { point: { radius: 0 } },
       }
     });
+
+    for (i = 0; i < chart.data.datasets[0].data.length; i++) {
+      if (radiator[i]) {
+        point_colors.push("#753430");
+      } else {
+        point_colors.push("#c45850");
+      }
+    }
+    chart.update();
+
   </script>
 </html>

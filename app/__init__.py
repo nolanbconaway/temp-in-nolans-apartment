@@ -42,23 +42,6 @@ def utc_to_nyc(utc):
     )
 
 
-def unzip_rows(rows):
-    """Handle a sequence of SQL rows and make it useful."""
-    dttms, temps = zip(
-        *(
-            (utc_to_nyc(r.dttm_utc), r.fahrenheit)
-            for i, r in enumerate(rows)
-            # skip the first row and rows with a huge change
-            if i > 0
-            and abs(r.fahrenheit - rows[i - 1].fahrenheit) < 1
-            and r.fahrenheit < 80
-            and r.fahrenheit > 40
-        )
-    )
-    reqs = list(map(temp_requirements, dttms))
-    return dttms, temps, reqs
-
-
 def temp_requirements(dttm):
     """Get temperature requirements per NYC law.
 
@@ -78,25 +61,86 @@ def handle_bad_request(e):
     return render_template("operationalerror.html"), 400
 
 
+def infer_radiator(rows, timeout=20):
+    """Infer when the radiator was on.
+
+    Accepts a list of sqlalchemy rows and returns a list of (start, stop) tuples.
+    Assumes the rows are ordered by time.
+    """
+    # get start time. we need 15 mins of data to make the call
+    start_utc = rows[0].dttm_utc + datetime.timedelta(minutes=15)
+
+    def temp_at_lower_bound(dttm):
+        """Get the temp at the latest point between 15 and 20 mins ago."""
+        d15 = dttm - datetime.timedelta(minutes=15)
+        d20 = dttm - datetime.timedelta(minutes=20)
+        return [i for i in rows if i.dttm_utc >= d20 and i.dttm_utc >= d15][
+            -1
+        ].fahrenheit
+
+    def mins_elapsed(upper, lower):
+        """Get the elapsed minutes between two datetimes."""
+        return (upper - lower).total_seconds() / 60
+
+    radiator_on = [
+        i.dttm_utc
+        for i in rows
+        if i.dttm_utc >= start_utc
+        and (i.fahrenheit - temp_at_lower_bound(i.dttm_utc)) > (0.007 * 15)
+    ]
+
+    limits = []
+    for startpoint in radiator_on[:-1]:
+
+        # move along if this moment is already part of a cycle.
+        if limits and startpoint <= limits[-1][-1]:
+            continue
+
+        endpoint = startpoint
+        for candidate in filter(lambda x: x > startpoint, radiator_on):
+            # if the timeout is reached, the cycle is over
+            if mins_elapsed(candidate, endpoint) > timeout:
+                break
+
+            # otherwise increment the endpoint
+            endpoint = candidate
+
+        # add if the total elapsed time is enough
+        if mins_elapsed(endpoint, startpoint) >= timeout:
+            limits.append((startpoint, endpoint))
+
+    return limits
+
+
 @app.route("/")
 def today():
     """Provide the main ui."""
-    # get timeseries
-    cutoff = datetime.datetime.utcnow() - datetime.timedelta(minutes=1440)
+    # get timeseries. back 1455 mins for the radiator detector.
+    # will trim the extra 15 mins off later.
+    cutoff = datetime.datetime.utcnow() - datetime.timedelta(minutes=1455)
     rows = (
         Snapshot.query.filter(Snapshot.dttm_utc >= cutoff)
         .order_by(Snapshot.dttm_utc)
         .all()
     )
-    dttms, temps, reqs = unzip_rows(rows)
+
+    # get radiator ON/OFF limits
+    radiator_limits_utc = infer_radiator(rows)
+    radiator_limits = [tuple(map(utc_to_nyc, i)) for i in radiator_limits_utc]
+
+    # remove extra 15 mins now that we know the limits
+    rows = [i for i in rows if i.dttm_utc > cutoff + datetime.timedelta(minutes=15)]
+
+    # unzip the rows
+    dttm_utc, temps = zip(*((r.dttm_utc, r.fahrenheit) for r in rows))
+
+    # get nyc time, temp requirements, radiator indicator
+    dttms = list(map(utc_to_nyc, dttm_utc))
+    reqs = list(map(temp_requirements, dttms))
+    radiator = [any(i >= l and i <= u for l, u in radiator_limits) for i in dttms]
 
     # get latest data
-    latest = (
-        Snapshot.query.filter(Snapshot.fahrenheit < 100)
-        .filter(Snapshot.fahrenheit > 40)
-        .order_by(Snapshot.dttm_utc.desc())
-        .first()
-    )
+    latest = Snapshot.query.order_by(Snapshot.dttm_utc.desc()).first()
 
     # render
     return render_template(
@@ -104,6 +148,8 @@ def today():
         dttms=dttms,
         temps=temps,
         reqs=reqs,
+        radiator=radiator,
+        radiator_limits=radiator_limits,
         fahrenheit=int(round(latest.fahrenheit)),
         last_update=utc_to_nyc(latest.dttm_utc),
     )
