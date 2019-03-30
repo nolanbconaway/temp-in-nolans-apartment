@@ -13,6 +13,8 @@ import pytz
 import datetime
 import os
 
+SHOW_RADIATOR_MODEL = False
+
 app = Flask(__name__)
 
 # set up database
@@ -73,10 +75,10 @@ def infer_radiator(rows, timeout=20):
     def temp_at_lower_bound(idx):
         """Get the temp at the latest point between 15 and 20 mins ago.
 
-        For speed, provide the index of the row you want the lower bound for.
-        This will search between that row and the one 25 rows before.
-        We assume the rows are sorted by datetime and I know that we usually get rows
-        per minute so this should work.
+        For speed, provide the index of the row you want the lower bound for. This will
+        search between that row and the one 25 rows before. We assume the rows are
+        sorted by datetime and I know that we usually get rows per minute so this
+        should work.
         """
         lag15 = rows[idx].dttm_utc - datetime.timedelta(minutes=15)
         lag20 = rows[idx].dttm_utc - datetime.timedelta(minutes=20)
@@ -137,9 +139,12 @@ def today():
         .all()
     )
 
-    # get radiator ON/OFF limits
-    radiator_limits_utc = infer_radiator(rows)
-    radiator_limits = [tuple(map(utc_to_nyc, i)) for i in radiator_limits_utc]
+    # get radiator ON/OFF limits if we are showing that
+    if SHOW_RADIATOR_MODEL:
+        radiator_limits_utc = infer_radiator(rows)
+        radiator_limits = [tuple(map(utc_to_nyc, i)) for i in radiator_limits_utc]
+    else:
+        radiator_limits = []
 
     # remove extra 15 mins now that we know the limits
     rows = [i for i in rows if i.dttm_utc > cutoff + datetime.timedelta(minutes=15)]
@@ -163,6 +168,7 @@ def today():
         reqs=reqs,
         radiator=radiator,
         n_radiators=len(radiator_limits),
+        show_radiator_model=SHOW_RADIATOR_MODEL,
         fahrenheit=int(round(latest.fahrenheit)),
         last_update=utc_to_nyc(latest.dttm_utc),
     )

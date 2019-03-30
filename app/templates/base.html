@@ -33,11 +33,13 @@
       {{last_update.strftime('%I:%M %p')}} (US/Eastern)
     </h2>
 
-    <h3>
-      The radiator was on {{n_radiators}}
-      time{% if n_radiators != 1 %}s{% endif %}
-      in the last 24 hours.
-    </h3>
+    {%if show_radiator_model%}
+      <h3>
+        The radiator was on {{n_radiators}}
+        time{% if n_radiators != 1 %}s{% endif %}
+        in the last 24 hours.
+      </h3>
+    {% endif %}
     </center>
 
     <div id="chart-container">
