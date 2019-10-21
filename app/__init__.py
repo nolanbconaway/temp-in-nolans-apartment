@@ -1,17 +1,13 @@
-from flask import Flask
-from flask import render_template
-from flask import redirect
-from flask import url_for
+import datetime
+import os
 
-from flask_sqlalchemy import SQLAlchemy
+import pytz
 import sqlalchemy.exc
-
+from flask import Flask, redirect, render_template, url_for
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 
-import pytz
-import datetime
-import os
+from flask_sqlalchemy import SQLAlchemy
 
 SHOW_RADIATOR_MODEL = False
 

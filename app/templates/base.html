@@ -1,30 +1,32 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
-  <head>
 
-    <!-- Global site tag (gtag.js) - Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-80719882-2"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'UA-80719882-2');
-    </script>
+<head>
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-80719882-2"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'UA-80719882-2');
+  </script>
 
 
-    <meta name="viewport" content="initial-scale=1">
+  <meta name="viewport" content="initial-scale=1">
 
-    <script src='{{url_for("static", filename="moment.min.js")}}'></script>
-    <script src='{{url_for("static", filename="Chart.min.js")}}'></script>
-    <link rel="stylesheet" href='{{url_for("static", filename="style.css")}}'>
-    <meta charset="utf-8">
+  <script src='{{url_for("static", filename="moment.min.js")}}'></script>
+  <script src='{{url_for("static", filename="Chart.min.js")}}'></script>
+  <link rel="stylesheet" href='{{url_for("static", filename="style.css")}}'>
+  <meta charset="utf-8">
 
-    <title>What Temperature is it in My Apartment</title>
+  <title>What Temperature is it in My Apartment</title>
 
-  </head>
-  <body>
+</head>
 
-    <center>
+<body>
+
+  <center>
     <h1>What Temperature is it in My Apartment?</h1>
 
     <h2>
@@ -34,198 +36,166 @@
     </h2>
 
     {%if show_radiator_model%}
-      <h3>
-        The radiator was on {{n_radiators}}
-        time{% if n_radiators != 1 %}s{% endif %}
-        in the last 24 hours.
-      </h3>
+    <h3>
+      The radiator was on {{n_radiators}}
+      time{% if n_radiators != 1 %}s{% endif %}
+      in the last 24 hours.
+    </h3>
     {% endif %}
-    </center>
+  </center>
 
-    <div id="chart-container">
-      <canvas id="line-chart" width="800" height="450"></canvas>
-    </div>
+  <div id="chart-container">
+    <canvas id="line-chart" width="800" height="450"></canvas>
+  </div>
 
-    <div id=info>
+  <div id=info>
 
-      <h2>What is this?</h2>
+    <h2>What is this?</h2>
 
+    <p>
+      In NYC, building owners are required to provide heat to tenants. Per
+      <a href="https://www1.nyc.gov/nyc-resources/service/1815/residential-heat-and-hot-water-requirements">this
+        page</a>, the requirements are:
+    </p>
+
+    <blockquote>
       <p>
-        Last winter, I felt like my apartment was very cold. I looked up
-        temperature requirements in NYC and found
-        <a href="https://www1.nyc.gov/nyc-resources/service/1815/residential-heat-and-hot-water-requirements">this page</a>:
+        Heat must be provided between October 1st and May 31st, i.e. "Heat Season," under the following conditions:
       </p>
+      <ul>
+        <li>
+          Between the hours of 6:00am and 10:00pm, if the outside temperature falls below 55 degrees, the inside
+          temperature is required to be at least 68 degrees Fahrenheit.
+        </li>
+        <li>
+          Between the hours of 10:00pm and 6:00am, the inside temperature is required to be at least 62 degrees
+          Fahrenheit.
+        </li>
+      </ul>
+    </blockquote>
 
-      <blockquote>
-        <p>
-          The period between October 1 and May 31 is Heat Season. During this
-          time, the City requires building owners to provide tenants with heat
-          according to the following rules:
-        </p>
-        <ul>
-          <li>
-            Between 6 AM and 10 PM, if the outside temperature falls below 55
-            degrees, the inside temperature must be at least 68 degrees
-            Fahrenheit.
-          </li>
-          <li>Between 10 PM and 6 AM, the inside temperature must be at least
-            62 degrees Fahrenheit at all times. There is no outside temperature
-            requirement.
-          </li>
-        </ul>
-      </blockquote>
+    <p>
+      I set up a raspberry pi with a thermometer so that I can check on whether my apartment is warm enough. The
+      temperature is recorded once per minute in a cron job, using my
+      <a href="https://github.com/nolanbconaway/thermometer">thermometer python library</a>. This move is partially
+      inspired by
+      <a href="https://github.com/johnmyleswhite/room_temperatures">John's room temperature dataset</a>.
+    </p>
 
-      <p>
-        I didn't collect any data to back this up, but I felt like it was
-        <i>often</i> cooler than 68&deg; in my apartment (though it was probably
-        rarely cooler than 62&deg;).
-      </p>
+    <h2>More Info</h2>
 
-      <p>
-        This year I will not make that mistake.
-      </p>
+    <h3>Where is the sensor?</h3>
+    <p>
+      I taped down the raspberry pi to the inside of cardboard box and put the box under the couch in the living room.
+      The living room is the warmest room in the house. The couch is a bit closer to the window than the radiator.
+    </p>
 
-      <p>
-         I want some hard data to bring to my building's management so that
-         they might <i>turn up the heat</i>.
+    <h3>How did you build it?</h3>
+    <p>
+      I followed a few guides.
+    </p>
 
-        So I hooked up a Raspberry Pi with a temperature sensor to record the
-        temperature every minute. This move is partially inspired by
-        <a href="https://github.com/johnmyleswhite/room_temperatures">John's
-        room temperature dataset</a>.
-      </p>
+    <ul>
+      <li>
+        Some of "<a
+          href="https://www.hackster.io/timfernando/a-raspberry-pi-thermometer-you-can-access-anywhere-33061c">A
+          Raspberry Pi Thermometer you can Access Anywhere</a>".
+      </li>
+      <li>
+        Some of "<a href="https://opensource.com/article/17/10/set-postgres-database-your-raspberry-pi">How to set up a
+          Postgres database on a Raspberry Pi</a>".
+      </li>
+    </ul>
+    <p>
 
-      <h3>Update (as of mid-December)</h3>
+      But I made some departures from each guide that i did not specifically
+      keep track of.
 
-      <p>
-        Independently of my efforts, a <i>petition</i> has been circulated
-        within the building in order to increase the temperature. Since then,
-        my thermometer has been reading at a comfy 70&deg;-72&deg;.
-      </p>
-
-      <p>
-         Before then, the temperature usually only fell below 68&deg; for an
-         hour or so at about 6AM. Maybe last winter it was colder? Maybe I am
-         just being a crazy person? I'll leave that up to you.
-      </p>
-
-      <h2>More Info</h2>
-
-        <h3>Where is the sensor?</h3>
-          <p>
-            It used to be on a shelf in the living room, with the wires loose
-            and exposed. I taped down the wires (hooked up with a breadboard)
-            and taped the whole thing to the inside of a cardboard box, then I
-            put the box under the couch.
-          </p>
-          <p>
-            The living room is known to be the warmest room in the house. I
-            think the radiator in that room is the best one we have. The couch
-            is a bit closer to the window than the radiator.
-          </p>
-
-        <h3>How did you build it?</h3>
-        <p>
-          I followed a few guides.
-        </p>
-
-        <ul>
-          <li>
-            Some of "<a href="https://www.hackster.io/timfernando/a-raspberry-pi-thermometer-you-can-access-anywhere-33061c">A Raspberry Pi Thermometer you can Access Anywhere</a>".
-          </li>
-          <li>
-            Some of "<a href="https://opensource.com/article/17/10/set-postgres-database-your-raspberry-pi">How to set up a Postgres database on a Raspberry Pi</a>".
-          </li>
-        </ul>
-        <p>
-
-          But I made some departures from each guide that i did not specifically
-          keep track of.
-
-          In particular I found the circuit in the thermometer guide did not work
-          and so I used <a href="https://pimylifeup.com/raspberry-pi-temperature-sensor/">
-          this one</a> instead.
-        </p>
+      In particular I found the circuit in the thermometer guide did not work
+      and so I used <a href="https://pimylifeup.com/raspberry-pi-temperature-sensor/">
+        this one</a> instead.
+    </p>
 
 
-    </div>
+  </div>
 
 
 
 
 
-  </body>
-  <script type="text/javascript">
-    var temps = {{temps | tojson | safe}}
-    var dttms = {{dttms | tojson | safe}}
-    var reqs = {{reqs | tojson | safe}}
-    var radiator = {{radiator | tojson | safe}}
-    var point_colors = [];
+</body>
+<script type="text/javascript">
+  var temps = {{ temps | tojson | safe}}
+  var dttms = {{ dttms | tojson | safe}}
+  var reqs = {{ reqs | tojson | safe}}
+  var radiator = {{ radiator | tojson | safe}}
+  var point_colors = [];
 
-    // dttms = dttms.map(Date.parse)
-    var chart = new Chart(document.getElementById("line-chart"), {
-      type: 'line',
-      data: {
-        labels: dttms,
-        datasets: [
-          {
-            data: temps,
-            label: "Degrees Fahrenheit",
-            // borderColor: "#c45850",
-            borderWidth: 1,
-            pointRadius: 1,
-            pointBackgroundColor: point_colors,
-            pointBorderColor: point_colors,
-          },
-
-          {
-            data: reqs,
-            label: "Minimum Required Temperature",
-            borderColor: 'rgba(0, 0, 0, 0.1)',
-            fill: false,
-            borderDash: [10,5],
-            pointRadius: 0,
-
-          },
-        ]
-      },
-      options: {
-        tooltips: {
-           enabled: true
+  // dttms = dttms.map(Date.parse)
+  var chart = new Chart(document.getElementById("line-chart"), {
+    type: 'line',
+    data: {
+      labels: dttms,
+      datasets: [
+        {
+          data: temps,
+          label: "Degrees Fahrenheit",
+          // borderColor: "#c45850",
+          borderWidth: 1,
+          pointRadius: 1,
+          pointBackgroundColor: point_colors,
+          pointBorderColor: point_colors,
         },
-        legend: {
-            display: false
-         },
-        scales: {
-           xAxes: [{
-               type: 'time',
-               time: {
-                 tooltipFormat: 'LT',
-               },
-               ticks: {},
-             }],
-           yAxes: [{
-             ticks: {
-               max : Math.ceil(Math.max(73, Math.max.apply(null, temps))),
-               min : Math.floor(Math.min(60, Math.min.apply(null, temps))),
-             },
-             scaleLabel: {
-                display: true,
-                labelString: 'Degrees Fahrenheit'
-              }
-           }]
-         },
-      }
-    });
 
-    for (i = 0; i < chart.data.datasets[0].data.length; i++) {
-      if (radiator[i]) {
-        point_colors.push("#753430");
-      } else {
-        point_colors.push("#c45850");
-      }
+        {
+          data: reqs,
+          label: "Minimum Required Temperature",
+          borderColor: 'rgba(0, 0, 0, 0.1)',
+          fill: false,
+          borderDash: [10, 5],
+          pointRadius: 0,
+
+        },
+      ]
+    },
+    options: {
+      tooltips: {
+        enabled: true
+      },
+      legend: {
+        display: false
+      },
+      scales: {
+        xAxes: [{
+          type: 'time',
+          time: {
+            tooltipFormat: 'LT',
+          },
+          ticks: {},
+        }],
+        yAxes: [{
+          ticks: {
+            max: Math.ceil(Math.max(73, Math.max.apply(null, temps))),
+            min: Math.floor(Math.min(60, Math.min.apply(null, temps))),
+          },
+          scaleLabel: {
+            display: true,
+            labelString: 'Degrees Fahrenheit'
+          }
+        }]
+      },
     }
-    chart.update();
+  });
 
-  </script>
+  for (i = 0; i < chart.data.datasets[0].data.length; i++) {
+    if (radiator[i]) {
+      point_colors.push("#753430");
+    } else {
+      point_colors.push("#c45850");
+    }
+  }
+  chart.update();
+
+</script>
+
 </html>
