@@ -30,18 +30,15 @@ class Snapshot(db.Model):
     fahrenheit = db.Column(db.Float)
 
 
-def utc_to_nyc(utc):
+def utc_to_nyc(utc: datetime.datetime) -> datetime.datetime:
     """Convert a UTC datetime to NYC time."""
     return pytz.timezone("US/Eastern").normalize(
         pytz.timezone("UTC").localize(utc.replace(microsecond=0))
     )
 
 
-def temp_requirements(dttm):
-    """Get temperature requirements per NYC law.
-
-    https://www1.nyc.gov/nyc-resources/service/1815/residential-heat-and-hot-water-requirements
-    """
+def temp_requirements(dttm: datetime.datetime) -> datetime.datetime:
+    """Get temperature requirements per NYC law."""
     if dttm.date().month < 10 and dttm.date().month > 5:
         return None
     if dttm.time().hour < 6 or dttm.time().hour > 21:
