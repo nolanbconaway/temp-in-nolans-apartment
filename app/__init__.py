@@ -3,17 +3,18 @@ import os
 import typing
 
 import pytz
-import sqlalchemy.exc
-from flask import Flask, redirect, render_template, url_for
+from flask import Flask, render_template
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.exc import OperationalError
 
 app = Flask(__name__)
 
 # set up database
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ["DATABASE_URI"]
+print(os.environ["DATABASE_URI"])
 db = SQLAlchemy(app)
 
 # set up limiter
@@ -73,7 +74,7 @@ def temp_requirements(dttm: datetime.datetime) -> datetime.datetime:
         return 68
 
 
-@app.errorhandler(sqlalchemy.exc.OperationalError)
+@app.errorhandler(OperationalError)
 def handle_bad_request(e):
     """Handle bad requests."""
     return render_template("operationalerror.html"), 400
