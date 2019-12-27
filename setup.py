@@ -14,5 +14,5 @@ setup(
         "psycopg2-binary==2.8.4",
         "pytz==2019.3",
     ],
-    extras_require={"test": ["black==19.10b0", "pydocstyle==5.0.1", "pytest==5.3.2"]},
+    extras_require={"test": ["black==19.10b0", "pytest==5.3.2"]},
 )
