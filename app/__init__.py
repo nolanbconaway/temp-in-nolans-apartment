@@ -14,7 +14,6 @@ app = Flask(__name__)
 # set up database
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ["DATABASE_URI"]
-print(os.environ["DATABASE_URI"])
 db = SQLAlchemy(app)
 
 # set up limiter
