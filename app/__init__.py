@@ -1,5 +1,6 @@
 import datetime
 import os
+import typing
 
 import pytz
 import sqlalchemy.exc
@@ -29,6 +30,31 @@ class Snapshot(db.Model):
     dttm_utc = db.Column(db.DateTime)
     fahrenheit = db.Column(db.Float)
 
+    def as_dict(self):
+        """Return view as a dictionary."""
+        return dict(id=self.id, dttm_utc=self.dttm_utc, fahrenheit=self.fahrenheit)
+
+
+def get_readings(
+    lower_utc: datetime.datetime, upper_utc: datetime.datetime = None
+) -> typing.List[dict]:
+    """Get temperature readings from the database in the period of lower to upper.
+    
+    Limits are inclusive, upper defaults to one minute ago.
+    """
+    query = Snapshot.query.filter(Snapshot.dttm_utc >= lower_utc)
+    if upper_utc is not None:
+        query = query.filter(Snapshot.dttm_utc <= upper_utc)
+
+    query = query.order_by(Snapshot.dttm_utc)
+
+    return list(i.as_dict() for i in query)
+
+
+def latest_reading() -> dict:
+    """Return the most recent temperature reading."""
+    return Snapshot.query.order_by(Snapshot.dttm_utc.desc()).first().as_dict()
+
 
 def utc_to_nyc(utc: datetime.datetime) -> datetime.datetime:
     """Convert a UTC datetime to NYC time."""
@@ -57,21 +83,17 @@ def handle_bad_request(e):
 def today():
     """Provide the main ui."""
     cutoff = datetime.datetime.utcnow() - datetime.timedelta(minutes=1440)
-    rows = (
-        Snapshot.query.filter(Snapshot.dttm_utc >= cutoff)
-        .order_by(Snapshot.dttm_utc)
-        .all()
-    )
 
-    # unzip the rows
-    dttm_utc, temps = zip(*((r.dttm_utc, r.fahrenheit) for r in rows))
+    dttm_utc, temps = zip(
+        *((r["dttm_utc"], r["fahrenheit"]) for r in get_readings(cutoff))
+    )
 
     # get nyc time, temp requirements
     dttms = list(map(utc_to_nyc, dttm_utc))
     reqs = list(map(temp_requirements, dttms))
 
     # get latest data
-    latest = Snapshot.query.order_by(Snapshot.dttm_utc.desc()).first()
+    latest = latest_reading()
 
     # render
     return render_template(
@@ -79,6 +101,6 @@ def today():
         dttms=dttms,
         temps=temps,
         reqs=reqs,
-        fahrenheit=int(round(latest.fahrenheit)),
-        last_update=utc_to_nyc(latest.dttm_utc),
+        fahrenheit=int(round(latest["fahrenheit"])),
+        last_update=utc_to_nyc(latest["dttm_utc"]),
     )
