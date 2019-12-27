@@ -13,3 +13,6 @@ venv/
 .env
 .python-version
 .vscode
+.pytest_cache
+*.egg-info
+.tox
