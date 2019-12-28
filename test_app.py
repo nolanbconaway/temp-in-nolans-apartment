@@ -32,14 +32,14 @@ def test_latest_reading(client, monkeypatch):
 def test_historical(client, monkeypatch):
     """Test that the latest reading is served correctly."""
     readings = [
-        {"id": 1, "dttm_utc": datetime.datetime(2019, 1, 1, 1, 1), "fahrenheit": 70},
-        {"id": 2, "dttm_utc": datetime.datetime(2019, 1, 1, 1, 2), "fahrenheit": 71},
+        {"id": 1, "dttm_utc": datetime.datetime(2019, 1, 6, 1, 1), "fahrenheit": 70},
+        {"id": 2, "dttm_utc": datetime.datetime(2019, 1, 6, 1, 2), "fahrenheit": 71},
     ]
     monkeypatch.setattr(app, "get_readings", lambda *x, **y: readings)
 
-    rv = client.get("/date/2019-01-01")
+    rv = client.get("/date/2019-01-06")
     html = rv.data.decode("utf-8")
-    assert "January 01 2019" in html
+    assert "January 06 2019" in html
 
 
 def test_datetime_roundtrip():
