@@ -8,6 +8,7 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import OperationalError
+from werkzeug.exceptions import BadRequest
 
 from .converters import DateConverter
 
@@ -128,6 +129,14 @@ def today():
 @app.route("/date/<date:date_nyc>")
 def view_date(date_nyc):
     """Show the readings from a given date."""
+    # vaidate date input
+    if date_nyc.date() < datetime.date(2019, 1, 5):
+        raise BadRequest("My database only has data from Jan 5 2019.")
+
+    if date_nyc.date() > utc_to_nyc(datetime.datetime.utcnow(), naive=True).date():
+        raise BadRequest("Cannot look into the future!")
+
+    # get limits of date
     lower_utc = nyc_to_utc(
         datetime.datetime(date_nyc.year, date_nyc.month, date_nyc.day, 0, 0, 0),
         naive=True,
@@ -136,6 +145,8 @@ def view_date(date_nyc):
         datetime.datetime(date_nyc.year, date_nyc.month, date_nyc.day, 23, 59, 59),
         naive=True,
     )
+
+    # query database
     dttm_utc, temps = zip(
         *(
             (r["dttm_utc"], r["fahrenheit"])
