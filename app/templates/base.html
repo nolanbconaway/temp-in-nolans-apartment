@@ -1,140 +1,93 @@
-<!DOCTYPE html>
-<html lang="en" dir="ltr">
-  <head>
-    <!-- Global site tag (gtag.js) - Google Analytics -->
-    <script
-      async
-      src="https://www.googletagmanager.com/gtag/js?id=UA-80719882-2"
-    ></script>
-    <script>
-      window.dataLayer = window.dataLayer || []
-      function gtag () {
-        dataLayer.push(arguments)
-      }
-      gtag('js', new Date())
-      gtag('config', 'UA-80719882-2')
-    </script>
+{% extends "layout.html" %} {% block content %}
 
-    <meta name="viewport" content="initial-scale=1" />
+<div id="chart-container">
+  <canvas id="line-chart" width="800" height="450"></canvas>
+</div>
 
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"
-      integrity="sha256-4iQZ6BVL4qNKlQ27TExEhBN1HFPvAvAMbFavKKosSWQ="
-      crossorigin="anonymous"
-    ></script>
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"
-      integrity="sha256-R4pqcOYV8lt7snxMQO/HSbVCFRPMdrhAFMH+vr9giYI="
-      crossorigin="anonymous"
-    ></script>
+<div id="info">
+  <h2>What is this?</h2>
 
-    <script src='{{url_for("static", filename="custom.js")}}'></script>
-    <link rel="stylesheet" href='{{url_for("static", filename="style.css")}}' />
-    <meta charset="utf-8" />
+  <p>
+    In NYC, building owners are required to provide heat to tenants. Per
+    <a href="https://portal.311.nyc.gov/article/?kanumber=KA-01036">this page</a
+    >, the requirements are:
+  </p>
 
-    <title>What Temperature is it in My Apartment</title>
-  </head>
+  <blockquote>
+    <p>
+      Heat must be provided between October 1st and May 31st, i.e. "Heat
+      Season," under the following conditions:
+    </p>
+    <ul>
+      <li>
+        Between the hours of 6:00am and 10:00pm, if the outside temperature
+        falls below 55 degrees, the inside temperature is required to be at
+        least 68 degrees Fahrenheit.
+      </li>
+      <li>
+        Between the hours of 10:00pm and 6:00am, the inside temperature is
+        required to be at least 62 degrees Fahrenheit.
+      </li>
+    </ul>
+  </blockquote>
 
-  <body>
-    <center>
-      <h1>What Temperature is it in My Apartment?</h1>
+  <p>
+    I set up a raspberry pi with a thermometer so that I can check on whether my
+    apartment is warm enough. The temperature is recorded once per minute in a
+    cron job, using my
+    <a href="https://github.com/nolanbconaway/thermometer"
+      >thermometer python library</a
+    >. This move is partially inspired by
+    <a href="https://github.com/johnmyleswhite/room_temperatures"
+      >John's room temperature dataset</a
+    >.
+  </p>
 
-      <h2>
-        {{fahrenheit}}&deg;F as of {{last_update.strftime('%I:%M %p')}}
-        (US/Eastern)
-      </h2>
-    </center>
+  <h2>More Info</h2>
 
-    <div id="chart-container">
-      <canvas id="line-chart" width="800" height="450"></canvas>
-    </div>
+  <h3>Where is the sensor?</h3>
+  <p>
+    I taped down the raspberry pi to the inside of cardboard box and put the box
+    under the couch in the living room. The living room is the warmest room in
+    the house. The couch is a bit closer to the window than the radiator.
+  </p>
 
-    <div id="info">
-      <h2>What is this?</h2>
+  <h3>How did you build it?</h3>
+  <p>
+    I followed a few guides.
+  </p>
 
-      <p>
-        In NYC, building owners are required to provide heat to tenants. Per
-        <a href="https://portal.311.nyc.gov/article/?kanumber=KA-01036"
-          >this page</a
-        >, the requirements are:
-      </p>
+  <ul>
+    <li>
+      Some of "<a
+        href="https://www.hackster.io/timfernando/a-raspberry-pi-thermometer-you-can-access-anywhere-33061c"
+        >A Raspberry Pi Thermometer you can Access Anywhere</a
+      >".
+    </li>
+    <li>
+      Some of "<a
+        href="https://opensource.com/article/17/10/set-postgres-database-your-raspberry-pi"
+        >How to set up a Postgres database on a Raspberry Pi</a
+      >".
+    </li>
+  </ul>
+  <p>
+    But I made some departures from each guide that i did not specifically keep
+    track of. In particular I found the circuit in the thermometer guide did not
+    work and so I used
+    <a href="https://pimylifeup.com/raspberry-pi-temperature-sensor/">
+      this one</a
+    >
+    instead.
+  </p>
+</div>
 
-      <blockquote>
-        <p>
-          Heat must be provided between October 1st and May 31st, i.e. "Heat
-          Season," under the following conditions:
-        </p>
-        <ul>
-          <li>
-            Between the hours of 6:00am and 10:00pm, if the outside temperature
-            falls below 55 degrees, the inside temperature is required to be at
-            least 68 degrees Fahrenheit.
-          </li>
-          <li>
-            Between the hours of 10:00pm and 6:00am, the inside temperature is
-            required to be at least 62 degrees Fahrenheit.
-          </li>
-        </ul>
-      </blockquote>
+<script type="text/javascript">
+  var temps = {{ temps | tojson | safe}}
+  var dttms = {{ dttms | tojson | safe}}
+  var reqs = {{ reqs | tojson | safe}}
 
-      <p>
-        I set up a raspberry pi with a thermometer so that I can check on
-        whether my apartment is warm enough. The temperature is recorded once
-        per minute in a cron job, using my
-        <a href="https://github.com/nolanbconaway/thermometer"
-          >thermometer python library</a
-        >. This move is partially inspired by
-        <a href="https://github.com/johnmyleswhite/room_temperatures"
-          >John's room temperature dataset</a
-        >.
-      </p>
+  createChart("line-chart", temps, dttms, reqs)
+</script>
 
-      <h2>More Info</h2>
-
-      <h3>Where is the sensor?</h3>
-      <p>
-        I taped down the raspberry pi to the inside of cardboard box and put the
-        box under the couch in the living room. The living room is the warmest
-        room in the house. The couch is a bit closer to the window than the
-        radiator.
-      </p>
-
-      <h3>How did you build it?</h3>
-      <p>
-        I followed a few guides.
-      </p>
-
-      <ul>
-        <li>
-          Some of "<a
-            href="https://www.hackster.io/timfernando/a-raspberry-pi-thermometer-you-can-access-anywhere-33061c"
-            >A Raspberry Pi Thermometer you can Access Anywhere</a
-          >".
-        </li>
-        <li>
-          Some of "<a
-            href="https://opensource.com/article/17/10/set-postgres-database-your-raspberry-pi"
-            >How to set up a Postgres database on a Raspberry Pi</a
-          >".
-        </li>
-      </ul>
-      <p>
-        But I made some departures from each guide that i did not specifically
-        keep track of. In particular I found the circuit in the thermometer
-        guide did not work and so I used
-        <a href="https://pimylifeup.com/raspberry-pi-temperature-sensor/">
-          this one</a
-        >
-        instead.
-      </p>
-    </div>
-  </body>
-
-  <script type="text/javascript">
-    var temps = {{ temps | tojson | safe}}
-    var dttms = {{ dttms | tojson | safe}}
-    var reqs = {{ reqs | tojson | safe}}
-
-    createChart("line-chart", temps, dttms, reqs)
-  </script>
-</html>
+{% endblock %}
