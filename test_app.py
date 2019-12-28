@@ -27,3 +27,23 @@ def test_latest_reading(client, monkeypatch):
     rv = client.get("/")
     html = rv.data.decode("utf-8")
     assert f'{latest["fahrenheit"]}&deg;F' in html
+
+
+def test_historical(client, monkeypatch):
+    """Test that the latest reading is served correctly."""
+    readings = [
+        {"id": 1, "dttm_utc": datetime.datetime(2019, 1, 6, 1, 1), "fahrenheit": 70},
+        {"id": 2, "dttm_utc": datetime.datetime(2019, 1, 6, 1, 2), "fahrenheit": 71},
+    ]
+    monkeypatch.setattr(app, "get_readings", lambda *x, **y: readings)
+
+    rv = client.get("/date/2019-01-06")
+    html = rv.data.decode("utf-8")
+    assert "January 06 2019" in html
+
+
+def test_datetime_roundtrip():
+    """Test the timezone conversion functions."""
+    utc_naive = datetime.datetime.utcnow().replace(microsecond=0)
+    nyc = app.utc_to_nyc(utc_naive)
+    assert app.nyc_to_utc(nyc, naive=True) == utc_naive
