@@ -160,5 +160,11 @@ def view_date(date_nyc):
 
     # render
     return render_template(
-        "date.html", date_nyc=date_nyc, dttms=dttms, temps=temps, reqs=reqs,
+        "date.html",
+        date_nyc=date_nyc,
+        previous_date=date_nyc - datetime.timedelta(days=1),
+        next_date=date_nyc + datetime.timedelta(days=1),
+        dttms=dttms,
+        temps=temps,
+        reqs=reqs,
     )

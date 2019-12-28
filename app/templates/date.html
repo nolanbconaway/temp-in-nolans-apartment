@@ -2,6 +2,20 @@
 
 <div id="chart-container">
   <canvas id="line-chart" width="800" height="450"></canvas>
+
+  <br />
+
+  <span style="float: left; width: 50%; text-align: left;">
+    <a href="{{url_for('view_date', date_nyc=previous_date)}}">
+      &larr; {{previous_date.strftime('%A, %B %d %Y')}}
+    </a>
+  </span>
+
+  <span style="float: left; width: 50%; text-align: right;">
+    <a href="{{url_for('view_date', date_nyc=next_date)}}">
+      {{next_date.strftime('%A, %B %d %Y')}} &rarr;
+    </a>
+  </span>
 </div>
 
 <script type="text/javascript">
