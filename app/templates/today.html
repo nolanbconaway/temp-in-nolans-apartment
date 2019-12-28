@@ -1,5 +1,12 @@
 {% extends "layout.html" %} {% block content %}
 
+<center>
+  <h2>
+    {{latest_fahrenheit}}&deg;F as of {{latest_dttm_nyc.strftime('%I:%M %p')}}
+    (US/Eastern)
+  </h2>
+</center>
+
 <div id="chart-container">
   <canvas id="line-chart" width="800" height="450"></canvas>
 </div>

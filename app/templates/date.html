@@ -1,0 +1,19 @@
+{% extends "layout.html" %} {% block content %}
+
+<div id="chart-container">
+  <canvas id="line-chart" width="800" height="450"></canvas>
+</div>
+
+<script type="text/javascript">
+  var temps = {{ temps | tojson | safe}}
+  var dttms = {{ dttms | tojson | safe}}
+  var reqs = {{ reqs | tojson | safe}}
+
+  chart = createChart("line-chart", temps, dttms, reqs, )
+  chart.options.title.text = "Historical data for {{date_nyc.strftime('%A, %B %d %Y')}}";
+  chart.options.title.display = true;
+  chart.options.title.fontSize = 15;
+  chart.update();
+</script>
+
+{% endblock %}
