@@ -22,7 +22,7 @@ db = SQLAlchemy(app)
 
 # set up limiter
 limiter = Limiter(
-    app, key_func=get_remote_address, default_limits=["200 per day", "5 per minute"]
+    app, key_func=get_remote_address, default_limits=["200 per day", "10 per minute"]
 )
 
 
