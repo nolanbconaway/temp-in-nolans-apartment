@@ -1,3 +1,5 @@
+"""Temperature in my apartment app."""
+
 import datetime
 import os
 import typing
