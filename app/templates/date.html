@@ -40,7 +40,7 @@
   var dttms = {{ dttms | tojson | safe}}
   var reqs = {{ reqs | tojson | safe}}
 
-  chart = createChart("line-chart", dttms, temps, reqs, )
+  var chart = createChart("line-chart", dttms, temps, reqs, )
   chart.options.title.text = "Historical data for {{date_nyc.strftime('%A, %B %d %Y')}}";
   chart.options.title.display = true;
   chart.options.title.fontSize = 14;

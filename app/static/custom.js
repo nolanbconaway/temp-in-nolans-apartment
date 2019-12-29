@@ -92,7 +92,7 @@ function createChart(elementID, datetimes, fahrenheit, requirements) {
         });
     };
 
-    chart = new Chart(document.getElementById(elementID), {
+    var chart = new Chart(document.getElementById(elementID), {
         type: 'line',
         data: { labels: datetimes, datasets: datasets },
         options: options
@@ -107,6 +107,7 @@ function createChart(elementID, datetimes, fahrenheit, requirements) {
     chart.options.animation.onComplete = function () {
         chart.downloadPNG = function () { downloadChart(elementID) }
     };
+
     return chart
 };
 

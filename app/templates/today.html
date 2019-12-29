@@ -94,7 +94,7 @@
   var dttms = {{ dttms | tojson | safe}}
   var reqs = {{ reqs | tojson | safe}}
 
-  createChart("line-chart", dttms, temps, reqs, )
+  var chart = createChart("line-chart", dttms, temps, reqs, )
 </script>
 
 {% endblock %}
