@@ -1,9 +1,11 @@
+"""Temperature in my apartment app."""
+
 import datetime
 import os
 import typing
 
 import pytz
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_sqlalchemy import SQLAlchemy
@@ -22,8 +24,14 @@ db = SQLAlchemy(app)
 
 # set up limiter
 limiter = Limiter(
-    app, key_func=get_remote_address, default_limits=["200 per day", "5 per minute"]
+    app, key_func=get_remote_address, default_limits=["200 per day", "10 per minute"]
 )
+
+
+@limiter.request_filter
+def ip_whitelist():
+    """Do not limit local dev debugging."""
+    return request.remote_addr == "127.0.0.1"
 
 
 class Snapshot(db.Model):

@@ -7,7 +7,7 @@
   </h2>
 </center>
 
-<div id="chart-container">
+<div class="chart-container">
   <canvas id="line-chart" width="800" height="450"></canvas>
 </div>
 
@@ -94,7 +94,7 @@
   var dttms = {{ dttms | tojson | safe}}
   var reqs = {{ reqs | tojson | safe}}
 
-  createChart("line-chart", temps, dttms, reqs)
+  var chart = createChart("line-chart", dttms, temps, reqs, )
 </script>
 
 {% endblock %}

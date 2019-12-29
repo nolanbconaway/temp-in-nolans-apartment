@@ -1,21 +1,38 @@
 {% extends "layout.html" %} {% block content %}
 
-<div id="chart-container">
-  <canvas id="line-chart" width="800" height="450"></canvas>
+<div class="chart-container">
+  <canvas id="line-chart" width="800" height="490"></canvas>
+</div>
 
+<div class="chart-nav">
+  <p>
+    <span style="float: left; width: 50%; text-align: left;">
+      <a href="{{url_for('view_date', date_nyc=previous_date)}}">
+        &larr; {{previous_date.strftime('%A, %B %d %Y')}}
+      </a>
+    </span>
+
+    <span style="float: left; width: 50%; text-align: right;">
+      <a href="{{url_for('view_date', date_nyc=next_date)}}">
+        {{next_date.strftime('%A, %B %d %Y')}} &rarr;
+      </a>
+    </span>
+  </p>
   <br />
-
-  <span style="float: left; width: 50%; text-align: left;">
-    <a href="{{url_for('view_date', date_nyc=previous_date)}}">
-      &larr; {{previous_date.strftime('%A, %B %d %Y')}}
+</div>
+<br />
+<div class="chart-nav">
+  <li>
+    <a href="#" onclick="chart.downloadPNG();return false;">
+      Download this .png
     </a>
-  </span>
+  </li>
 
-  <span style="float: left; width: 50%; text-align: right;">
-    <a href="{{url_for('view_date', date_nyc=next_date)}}">
-      {{next_date.strftime('%A, %B %d %Y')}} &rarr;
+  <li>
+    <a href="#" onclick="chart.downloadCSV();return false;">
+      Download this .csv
     </a>
-  </span>
+  </li>
 </div>
 
 <script type="text/javascript">
@@ -23,10 +40,10 @@
   var dttms = {{ dttms | tojson | safe}}
   var reqs = {{ reqs | tojson | safe}}
 
-  chart = createChart("line-chart", temps, dttms, reqs, )
+  var chart = createChart("line-chart", dttms, temps, reqs, )
   chart.options.title.text = "Historical data for {{date_nyc.strftime('%A, %B %d %Y')}}";
   chart.options.title.display = true;
-  chart.options.title.fontSize = 15;
+  chart.options.title.fontSize = 14;
   chart.update();
 </script>
 
