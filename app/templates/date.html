@@ -1,10 +1,9 @@
 {% extends "layout.html" %} {% block content %}
 
 <div id="chart-container">
-  <canvas id="line-chart" width="800" height="450"></canvas>
-
-  <br />
-
+  <canvas id="line-chart" width="800" height="490"></canvas>
+</div>
+<div id="date_nav">
   <span style="float: left; width: 50%; text-align: left;">
     <a href="{{url_for('view_date', date_nyc=previous_date)}}">
       &larr; {{previous_date.strftime('%A, %B %d %Y')}}
@@ -26,7 +25,7 @@
   chart = createChart("line-chart", temps, dttms, reqs, )
   chart.options.title.text = "Historical data for {{date_nyc.strftime('%A, %B %d %Y')}}";
   chart.options.title.display = true;
-  chart.options.title.fontSize = 15;
+  chart.options.title.fontSize = 14;
   chart.update();
 </script>
 

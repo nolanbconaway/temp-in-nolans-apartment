@@ -31,3 +31,8 @@ blockquote p {
 #chart-container {
   margin-left: 0.5em;
 }
+
+#date_nav {
+  margin-left: 0.5em;
+  margin-top: 0.5em;
+}
