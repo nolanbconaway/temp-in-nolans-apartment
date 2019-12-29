@@ -22,9 +22,17 @@
 </div>
 <br />
 <div class="chart-nav">
-  <a href="#" onclick="chart.download();return false;">
-    Download this plot (.png)
-  </a>
+  <li>
+    <a href="#" onclick="chart.downloadPNG();return false;">
+      Download this .png
+    </a>
+  </li>
+
+  <li>
+    <a href="#" onclick="chart.downloadCSV();return false;">
+      Download this .csv
+    </a>
+  </li>
 </div>
 
 <script type="text/javascript">
@@ -32,7 +40,7 @@
   var dttms = {{ dttms | tojson | safe}}
   var reqs = {{ reqs | tojson | safe}}
 
-  chart = createChart("line-chart", temps, dttms, reqs, )
+  chart = createChart("line-chart", dttms, temps, reqs, )
   chart.options.title.text = "Historical data for {{date_nyc.strftime('%A, %B %d %Y')}}";
   chart.options.title.display = true;
   chart.options.title.fontSize = 14;

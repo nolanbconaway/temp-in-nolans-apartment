@@ -14,13 +14,46 @@ function downloadChart(elementID) {
 }
 
 /**
- * createChart inserts a chart.js chart into an elementID, returning the chart variable.
- * @param {string} elementID - string ID of the element to insert the chart within.
- * @param {Array.Number} fahrenheit - Temperature readings, in Fahrenheit.
+ * downloadCSV creates CSV data diven dates, temps and requirements, then downloads the data.
  * @param {Array.Date} datetimes - Datetime of each of the Fahrenheit reading.
+ * @param {Array.Number} fahrenheit - Temperature readings, in Fahrenheit.
  * @param {Array.Number} [requirements] - Optional required temperature per nyc regulation.
  */
-function createChart(elementID, fahrenheit, datetimes, requirements) {
+function downloadCSV(datetimes, fahrenheit, requirements) {
+    if (requirements !== undefined) {
+        var headers = '\ndatetime\tfahrenheit\trequirement\n'
+        var zipped = datetimes.map(function (e, i) {
+            return [e, fahrenheit[i], requirements[i]];
+        });
+    } else {
+        var headers = '\ndttm\tfahrenheit\n'
+        var zipped = datetimes.map(function (e, i) {
+            return [e, fahrenheit[i]];
+        });
+    }
+
+    var tsv = headers + zipped.map(function (d) {
+        return d.join('\t');
+    }).join('\n');
+
+    // there MUST be a better way to do this
+    var a = document.createElement("a");
+    var blob = new Blob([tsv], { type: 'text/csv;charset=utf-8;' });
+    var url = URL.createObjectURL(blob);
+    a.href = url;
+    a.download = "chart.csv";
+    a.click();
+    a.remove();
+}
+
+/**
+ * createChart inserts a chart.js chart into an elementID, returning the chart variable.
+ * @param {string} elementID - string ID of the element to insert the chart within.
+ * @param {Array.Date} datetimes - Datetime of each of the Fahrenheit reading.
+ * @param {Array.Number} fahrenheit - Temperature readings, in Fahrenheit.
+ * @param {Array.Number} [requirements] - Optional required temperature per nyc regulation.
+ */
+function createChart(elementID, datetimes, fahrenheit, requirements) {
     var datasets = [{
         data: fahrenheit,
         label: "Degrees Fahrenheit",
@@ -65,9 +98,14 @@ function createChart(elementID, fahrenheit, datetimes, requirements) {
         options: options
     });
 
+    // add download csv shortcut
+    chart.downloadCSV = function () {
+        downloadCSV(datetimes, fahrenheit, requirements)
+    }
+
     // add download shortcut when chart is ready
     chart.options.animation.onComplete = function () {
-        chart.download = function () { downloadChart(elementID) }
+        chart.downloadPNG = function () { downloadChart(elementID) }
     };
     return chart
 };
