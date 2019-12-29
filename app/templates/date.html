@@ -1,20 +1,30 @@
 {% extends "layout.html" %} {% block content %}
 
-<div id="chart-container">
+<div class="chart-container">
   <canvas id="line-chart" width="800" height="490"></canvas>
 </div>
-<div id="date_nav">
-  <span style="float: left; width: 50%; text-align: left;">
-    <a href="{{url_for('view_date', date_nyc=previous_date)}}">
-      &larr; {{previous_date.strftime('%A, %B %d %Y')}}
-    </a>
-  </span>
 
-  <span style="float: left; width: 50%; text-align: right;">
-    <a href="{{url_for('view_date', date_nyc=next_date)}}">
-      {{next_date.strftime('%A, %B %d %Y')}} &rarr;
-    </a>
-  </span>
+<div class="chart-nav">
+  <p>
+    <span style="float: left; width: 50%; text-align: left;">
+      <a href="{{url_for('view_date', date_nyc=previous_date)}}">
+        &larr; {{previous_date.strftime('%A, %B %d %Y')}}
+      </a>
+    </span>
+
+    <span style="float: left; width: 50%; text-align: right;">
+      <a href="{{url_for('view_date', date_nyc=next_date)}}">
+        {{next_date.strftime('%A, %B %d %Y')}} &rarr;
+      </a>
+    </span>
+  </p>
+  <br />
+</div>
+<br />
+<div class="chart-nav">
+  <a href="#" onclick="chart.download();return false;">
+    Download this plot (.png)
+  </a>
 </div>
 
 <script type="text/javascript">

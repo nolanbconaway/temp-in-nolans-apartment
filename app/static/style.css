@@ -28,11 +28,11 @@ blockquote p {
   display: inline;
 }
 
-#chart-container {
+.chart-container {
   margin-left: 0.5em;
 }
 
-#date_nav {
+.chart-nav {
   margin-left: 0.5em;
   margin-top: 0.5em;
 }

@@ -1,4 +1,19 @@
 /**
+ * downloadChart starts a png download of a chart.js chart given its canvas elementID.
+ * @param {string} elementID - string ID of the element to insert the chart within.
+ */
+function downloadChart(elementID) {
+    var url = document.getElementById(elementID).toDataURL('image/png');
+
+    // there MUST be a better way to do this
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = "chart.png";
+    a.click()
+    a.remove()
+}
+
+/**
  * createChart inserts a chart.js chart into an elementID, returning the chart variable.
  * @param {string} elementID - string ID of the element to insert the chart within.
  * @param {Array.Number} fahrenheit - Temperature readings, in Fahrenheit.
@@ -50,5 +65,10 @@ function createChart(elementID, fahrenheit, datetimes, requirements) {
         options: options
     });
 
+    // add download shortcut when chart is ready
+    chart.options.animation.onComplete = function () {
+        chart.download = function () { downloadChart(elementID) }
+    };
     return chart
 };
+
