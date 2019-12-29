@@ -28,7 +28,7 @@ function createChart(elementID, fahrenheit, datetimes, requirements) {
                     max: Math.ceil(Math.max(73, Math.max.apply(null, fahrenheit) * 1.05)),
                     min: Math.floor(Math.min(60, Math.min.apply(null, fahrenheit) * 0.95)),
                 },
-                scaleLabel: { display: true, labelString: 'Degrees Fahrenheit' }
+                scaleLabel: { display: false, labelString: 'Degrees Fahrenheit' }
             }]
         },
     }
