@@ -15,16 +15,15 @@
   <h2>What is this?</h2>
 
   <p>
-    I hooked up a DS18B20 temperature sensor to a raspberry pi! Then I wrote a
-    <a href="https://github.com/nolanbconaway/thermometer">python library</a> and a cron
-    job which collects readings once per minute and stores them in a postgres database.
-    This webapp fetches recent data from that database and displays it with Chart.js.
+    This webapp displays recent temperatures collected from inside my home office. The
+    data are collected via a DS18B20 sensor which is hooked up to a raspberry pi.
   </p>
 
   <p>
-    I taped down the raspberry pi to the inside of cardboard box and put the box
-    under the desk in my office. I find that temperatures are a couple of degrees (F)
-    warmer in that box than outside of it (probably due to heat from the raspberry pi).
+    The raspberry pi is running a cron job which stores the temperature once per minute
+    in a locally hosted postgres database.
+    The raspberry pi is connected via a wifi adapter, and requests to this page are
+    routed directly to it &#128556;.
   </p>
 </div>
 
