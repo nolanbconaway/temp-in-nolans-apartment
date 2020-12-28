@@ -104,6 +104,7 @@ def temp_requirements(dttm: datetime.datetime) -> datetime.datetime:
 @app.errorhandler(OperationalError)
 def handle_bad_request(e):
     """Handle bad requests."""
+    print(e)
     return render_template("operationalerror.html"), 400
 
 
