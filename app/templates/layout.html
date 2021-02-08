@@ -1,40 +1,41 @@
 <html lang="en" dir="ltr">
-  <head>
-    <!-- Global site tag (gtag.js) - Google Analytics -->
-    <script
-      async
-      src="https://www.googletagmanager.com/gtag/js?id=UA-80719882-2"
-    ></script>
-    <script>
-      window.dataLayer = window.dataLayer || []
-      function gtag () {
-        dataLayer.push(arguments)
-      }
-      gtag('js', new Date())
-      gtag('config', 'UA-80719882-2')
-    </script>
 
-    <meta name="viewport" content="initial-scale=1" />
+<head>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-80719882-2"></script>
+  <script>
+    window.dataLayer = window.dataLayer || []
+    function gtag() {
+      dataLayer.push(arguments)
+    }
+    gtag('js', new Date())
+    gtag('config', 'UA-80719882-2')
+  </script>
 
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"
-      integrity="sha256-4iQZ6BVL4qNKlQ27TExEhBN1HFPvAvAMbFavKKosSWQ="
-      crossorigin="anonymous"
-    ></script>
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"
-      integrity="sha256-R4pqcOYV8lt7snxMQO/HSbVCFRPMdrhAFMH+vr9giYI="
-      crossorigin="anonymous"
-    ></script>
-    <script src='{{url_for("static", filename="custom.js")}}'></script>
-    <link rel="stylesheet" href='{{url_for("static", filename="style.css")}}' />
-    <meta charset="utf-8" />
+  <meta name="viewport" content="initial-scale=1" />
 
-    <title>What Temperature is it in My Apartment</title>
-  </head>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"
+    integrity="sha256-4iQZ6BVL4qNKlQ27TExEhBN1HFPvAvAMbFavKKosSWQ=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"
+    integrity="sha256-R4pqcOYV8lt7snxMQO/HSbVCFRPMdrhAFMH+vr9giYI=" crossorigin="anonymous"></script>
+  <script src='{{url_for("static", filename="custom.js")}}'></script>
+  <link rel="stylesheet" href='{{url_for("static", filename="style.css")}}' />
+  <meta charset="utf-8" />
 
-  <body>
-    <center><h1>What Temperature is it in My Apartment?</h1></center>
-    {% block content %}{% endblock %}
-  </body>
+  <title>What Temperature is it in My Apartment</title>
+</head>
+
+<body>
+  <center>
+    <h1>What Temperature is it in My Apartment?</h1>
+  </center>
+  <div>
+    <center>
+      NOTE (Feb 8 2021): The breadboard supporting the DS18B20 sensor finally kicked out and is
+      now exclusively returning readings of 262F. I'm working on obtaining a new sensor and hooking it up!
+    </center>
+  </div>
+  {% block content %}{% endblock %}
+</body>
+
 </html>
