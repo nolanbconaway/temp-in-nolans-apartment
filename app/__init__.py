@@ -37,7 +37,7 @@ def ip_whitelist():
 class Snapshot(db.Model):
     """Snapshot data model."""
 
-    __tablename__ = "empty_snapshots"
+    __tablename__ = "snapshots"
     id = db.Column(db.Integer, primary_key=True)
     dttm_utc = db.Column(db.DateTime)
     fahrenheit = db.Column(db.Float)
