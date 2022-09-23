@@ -112,10 +112,12 @@ def handle_bad_request(e):
 def today():
     """Provide the main ui."""
     cutoff = datetime.datetime.utcnow() - datetime.timedelta(minutes=1440)
+    readings = get_readings(cutoff)
 
-    dttm_utc, temps = zip(
-        *((r["dttm_utc"], r["fahrenheit"]) for r in get_readings(cutoff))
-    )
+    if not readings:
+        return render_template("noreadings.html"), 400
+
+    dttm_utc, temps = zip(*((r["dttm_utc"], r["fahrenheit"]) for r in readings))
 
     # get nyc time, temp requirements
     dttms = list(map(utc_to_nyc, dttm_utc))

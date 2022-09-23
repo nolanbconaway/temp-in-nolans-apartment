@@ -30,7 +30,7 @@ def test_latest_reading(client, monkeypatch):
 
 
 def test_historical(client, monkeypatch):
-    """Test that the latest reading is served correctly."""
+    """Test that the historical readings are served correctly."""
     readings = [
         {"id": 1, "dttm_utc": datetime.datetime(2019, 1, 6, 1, 1), "fahrenheit": 70},
         {"id": 2, "dttm_utc": datetime.datetime(2019, 1, 6, 1, 2), "fahrenheit": 71},
@@ -47,3 +47,13 @@ def test_datetime_roundtrip():
     utc_naive = datetime.datetime.utcnow().replace(microsecond=0)
     nyc = app.utc_to_nyc(utc_naive)
     assert app.nyc_to_utc(nyc, naive=True) == utc_naive
+
+
+def test_no_readings_handler(client, monkeypatch):
+    """Test the edge case when there are no readings."""
+    readings = []
+    monkeypatch.setattr(app, "get_readings", lambda *x, **y: readings)
+
+    rv = client.get("/")
+    html = rv.data.decode("utf-8")
+    assert "no recent readings" in html
