@@ -4,7 +4,7 @@
     ],
     "functions": {
         "app": {
-            "runtime": "python37"
+            "runtime": "python@3.8"
         }
       }
 }
