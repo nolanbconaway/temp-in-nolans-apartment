@@ -176,3 +176,9 @@ def view_date(date_nyc):
         temps=temps,
         reqs=reqs,
     )
+
+
+@app.route("/health")
+def health():
+    """Health check endpoint."""
+    return "OK"
