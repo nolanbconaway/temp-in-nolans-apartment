@@ -4,7 +4,7 @@ on: push
 
 jobs:
   build:
-    name: Main Workflow
+    name: Lint and Test
 
     runs-on: ubuntu-latest
     strategy:
