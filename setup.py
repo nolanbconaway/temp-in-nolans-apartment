@@ -25,6 +25,7 @@ setup(
         "pyparsing==3.0.9",
         "pytz==2022.2.1",
         "rich==12.5.1",
+        "sqlalchemy==1.4.41",
         "typing-extensions==4.3.0",
         "Werkzeug==2.2.2",
         "wrapt==1.14.1",

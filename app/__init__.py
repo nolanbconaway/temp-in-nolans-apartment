@@ -9,6 +9,7 @@ import pytz
 from flask import Flask, render_template, request
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from sqlalchemy import create_engine
 from werkzeug.exceptions import BadRequest
 
 from .converters import DateConverter
@@ -22,32 +23,7 @@ limiter = Limiter(
     app, key_func=get_remote_address, default_limits=["200 per day", "10 per minute"]
 )
 
-
-class PGConnection:
-    """Postgres connection manager.
-
-    Reconnects if connection is closed.
-    """
-
-    def __init__(self):
-        self.uri = os.environ["DATABASE_URI"]
-
-        if bool(int(os.getenv("IS_TEST_ENV", "0"))):
-            print("Not connecting to database in test environment")
-            self.conn = None
-        else:
-            print("Connecting to database")
-            self.conn = psycopg2.connect(self.uri)
-
-    def cursor(self, *args, **kwargs):
-        # check if connection is still alive. if not, reconnect
-        if self.conn.closed:
-            print("Reconnecting to database")
-            self.conn = psycopg2.connect(self.uri)
-        return self.conn.cursor(*args, **kwargs)
-
-
-DB_CONNECTION = PGConnection()
+engine = create_engine(os.environ["DATABASE_URI"])
 
 
 @limiter.request_filter
@@ -71,9 +47,10 @@ def get_readings(
           and snapshots.dttm_utc < %(ub_utc)s
         order by dttm_utc
     """
-    with DB_CONNECTION.cursor() as cursor:
-        cursor.execute(sql, dict(lb_utc=lower_utc, ub_utc=upper_utc))
-        return [dict(dttm_utc=row[0], fahrenheit=row[1]) for row in cursor.fetchall()]
+    return [
+        dict(dttm_utc=row[0], fahrenheit=row[1])
+        for row in engine.execute(sql, lb_utc=lower_utc, ub_utc=upper_utc).fetchall()
+    ]
 
 
 def latest_reading() -> dict:
@@ -84,9 +61,7 @@ def latest_reading() -> dict:
         order by dttm_utc desc
         limit 1
     """
-    with DB_CONNECTION.cursor() as cur:
-        cur.execute(sql)
-        row = cur.fetchone()
+    row = engine.execute(sql).fetchone()
     return dict(dttm_utc=row[0], fahrenheit=row[1])
 
 
