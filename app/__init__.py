@@ -51,7 +51,7 @@ def get_readings(
     lower_utc: datetime.datetime, upper_utc: datetime.datetime = None
 ) -> typing.List[dict]:
     """Get temperature readings from the database in the period of lower to upper.
-    
+
     Limits are inclusive, upper defaults to one minute ago.
     """
     query = Snapshot.query.filter(Snapshot.dttm_utc >= lower_utc)
@@ -80,7 +80,7 @@ def utc_to_nyc(utc: datetime.datetime, naive: bool = False) -> datetime.datetime
 
 def nyc_to_utc(nyc: datetime.datetime, naive: bool = False) -> datetime.datetime:
     """Convert a NYC datetime to UTC time.
-    
+
     Optionally make the datetime timezone naive.
     """
     if nyc.tzinfo is None:

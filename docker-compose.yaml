@@ -1,0 +1,11 @@
+services:
+  web:
+    environment:
+      - DATABASE_URI=${DATABASE_URI}
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    expose:
+      - "8000"
