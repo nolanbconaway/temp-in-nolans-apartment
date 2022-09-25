@@ -4,12 +4,11 @@ import datetime
 import os
 import typing
 
+import psycopg2
 import pytz
 from flask import Flask, render_template, request
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.exc import OperationalError
 from werkzeug.exceptions import BadRequest
 
 from .converters import DateConverter
@@ -17,10 +16,6 @@ from .converters import DateConverter
 app = Flask(__name__)
 app.url_map.converters["date"] = DateConverter
 
-# set up database
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ["DATABASE_URI"]
-db = SQLAlchemy(app)
 
 # set up limiter
 limiter = Limiter(
@@ -28,23 +23,37 @@ limiter = Limiter(
 )
 
 
+class PGConnection:
+    """Postgres connection manager.
+
+    Reconnects if connection is closed.
+    """
+
+    def __init__(self):
+        self.uri = os.environ["DATABASE_URI"]
+
+        if bool(int(os.getenv("IS_TEST_ENV", "0"))):
+            print("Not connecting to database in test environment")
+            self.conn = None
+        else:
+            print("Connecting to database")
+            self.conn = psycopg2.connect(self.uri)
+
+    def cursor(self, *args, **kwargs):
+        # check if connection is still alive. if not, reconnect
+        if self.conn.closed:
+            print("Reconnecting to database")
+            self.conn = psycopg2.connect(self.uri)
+        return self.conn.cursor(*args, **kwargs)
+
+
+DB_CONNECTION = PGConnection()
+
+
 @limiter.request_filter
 def ip_whitelist():
     """Do not limit local dev debugging."""
     return request.remote_addr == "127.0.0.1"
-
-
-class Snapshot(db.Model):
-    """Snapshot data model."""
-
-    __tablename__ = "snapshots"
-    id = db.Column(db.Integer, primary_key=True)
-    dttm_utc = db.Column(db.DateTime)
-    fahrenheit = db.Column(db.Float)
-
-    def as_dict(self):
-        """Return view as a dictionary."""
-        return dict(id=self.id, dttm_utc=self.dttm_utc, fahrenheit=self.fahrenheit)
 
 
 def get_readings(
@@ -54,18 +63,31 @@ def get_readings(
 
     Limits are inclusive, upper defaults to one minute ago.
     """
-    query = Snapshot.query.filter(Snapshot.dttm_utc >= lower_utc)
-    if upper_utc is not None:
-        query = query.filter(Snapshot.dttm_utc <= upper_utc)
-
-    query = query.order_by(Snapshot.dttm_utc)
-
-    return list(i.as_dict() for i in query)
+    upper_utc = upper_utc or datetime.datetime.utcnow()
+    sql = """
+        select dttm_utc, fahrenheit
+        from snapshots
+        where snapshots.dttm_utc >= %(lb_utc)s
+          and snapshots.dttm_utc < %(ub_utc)s
+        order by dttm_utc
+    """
+    with DB_CONNECTION.cursor() as cursor:
+        cursor.execute(sql, dict(lb_utc=lower_utc, ub_utc=upper_utc))
+        return [dict(dttm_utc=row[0], fahrenheit=row[1]) for row in cursor.fetchall()]
 
 
 def latest_reading() -> dict:
     """Return the most recent temperature reading."""
-    return Snapshot.query.order_by(Snapshot.dttm_utc.desc()).first().as_dict()
+    sql = """
+        select dttm_utc, fahrenheit
+        from snapshots
+        order by dttm_utc desc
+        limit 1
+    """
+    with DB_CONNECTION.cursor() as cur:
+        cur.execute(sql)
+        row = cur.fetchone()
+    return dict(dttm_utc=row[0], fahrenheit=row[1])
 
 
 def utc_to_nyc(utc: datetime.datetime, naive: bool = False) -> datetime.datetime:
@@ -101,7 +123,7 @@ def temp_requirements(dttm: datetime.datetime) -> datetime.datetime:
         return 68
 
 
-@app.errorhandler(OperationalError)
+@app.errorhandler(psycopg2.OperationalError)
 def handle_bad_request(e):
     """Handle bad requests."""
     print(e)
