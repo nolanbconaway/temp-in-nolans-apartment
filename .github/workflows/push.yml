@@ -30,4 +30,4 @@ jobs:
       - name: Run unit tests with Pytest
         run: pytest --verbose
         env:
-          DATABASE_URI: "sqlite://local.db"
+          DATABASE_URI: "sqlite:///local.db"
