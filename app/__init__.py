@@ -31,7 +31,7 @@ class PGConnection:
 
     def __init__(self):
         self.uri = os.environ["DATABASE_URI"]
-        
+
         if bool(int(os.getenv("IS_TEST_ENV", "0"))):
             print("Not connecting to database in test environment")
             self.conn = None
