@@ -1,6 +1,5 @@
 """Test the app."""
 import datetime
-import tempfile
 
 import pytest
 
@@ -8,7 +7,7 @@ import app
 
 
 @pytest.fixture
-def client(monkeypatch):
+def client():
     """Test app fixture."""
     with app.app.test_client() as client:
         yield client

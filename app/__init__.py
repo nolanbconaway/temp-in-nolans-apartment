@@ -4,12 +4,12 @@ import datetime
 import os
 import typing
 
+import psycopg2
 import pytz
 from flask import Flask, render_template, request
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from werkzeug.exceptions import BadRequest
-import psycopg2
 
 from .converters import DateConverter
 
@@ -29,10 +29,15 @@ class PGConnection:
     Reconnects if connection is closed.
     """
 
-    def __init__(self, uri: str):
-        self.uri = uri
-        print("Connecting to database")
-        self.conn = psycopg2.connect(uri)
+    def __init__(self):
+        self.uri = os.environ["DATABASE_URI"]
+        
+        if bool(int(os.getenv("IS_TEST_ENV", "0"))):
+            print("Not connecting to database in test environment")
+            self.conn = None
+        else:
+            print("Connecting to database")
+            self.conn = psycopg2.connect(self.uri)
 
     def cursor(self, *args, **kwargs):
         # check if connection is still alive. if not, reconnect
@@ -42,7 +47,7 @@ class PGConnection:
         return self.conn.cursor(*args, **kwargs)
 
 
-DB_CONNECTION = PGConnection(os.environ["DATABASE_URI"])
+DB_CONNECTION = PGConnection()
 
 
 @limiter.request_filter
