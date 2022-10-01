@@ -9,6 +9,7 @@ import pytz
 from flask import Flask, render_template, request
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine
 from werkzeug.exceptions import BadRequest
 
@@ -16,14 +17,18 @@ from .converters import DateConverter
 
 app = Flask(__name__)
 app.url_map.converters["date"] = DateConverter
-
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ["DATABASE_URI"]
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 # set up limiter
 limiter = Limiter(
-    app, key_func=get_remote_address, default_limits=["200 per day", "10 per minute"]
+    app,
+    key_func=get_remote_address,
+    default_limits=["200 per day", "10 per minute"],
+    storage_uri="memcached://localhost:11211",
 )
 
-engine = create_engine(os.environ["DATABASE_URI"])
+db = SQLAlchemy(app=app)
 
 
 @limiter.request_filter
@@ -43,13 +48,15 @@ def get_readings(
     sql = """
         select dttm_utc, fahrenheit
         from snapshots
-        where snapshots.dttm_utc >= %(lb_utc)s
-          and snapshots.dttm_utc < %(ub_utc)s
+        where snapshots.dttm_utc >= :lb_utc
+          and snapshots.dttm_utc < :ub_utc
         order by dttm_utc
     """
     return [
         dict(dttm_utc=row[0], fahrenheit=row[1])
-        for row in engine.execute(sql, lb_utc=lower_utc, ub_utc=upper_utc).fetchall()
+        for row in db.session.execute(
+            sql, params=dict(lb_utc=lower_utc, ub_utc=upper_utc)
+        ).fetchall()
     ]
 
 
@@ -61,7 +68,7 @@ def latest_reading() -> dict:
         order by dttm_utc desc
         limit 1
     """
-    row = engine.execute(sql).fetchone()
+    row = db.session.execute(sql).fetchone()
     return dict(dttm_utc=row[0], fahrenheit=row[1])
 
 
