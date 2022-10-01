@@ -10,7 +10,6 @@ from flask import Flask, render_template, request
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import create_engine
 from werkzeug.exceptions import BadRequest
 
 from .converters import DateConverter
@@ -25,7 +24,7 @@ limiter = Limiter(
     app,
     key_func=get_remote_address,
     default_limits=["200 per day", "10 per minute"],
-    storage_uri="memcached://localhost:11211",
+    storage_uri="memory://",
 )
 
 db = SQLAlchemy(app=app)
