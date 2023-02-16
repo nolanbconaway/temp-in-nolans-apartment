@@ -29,7 +29,7 @@ setup(
         "rich==12.5.1",
         "sqlalchemy==1.4.41",
         "typing-extensions==4.3.0",
-        "Werkzeug==2.2.2",
+        "Werkzeug==2.2.3",
         "wrapt==1.14.1",
         "zipp==3.8.1",
         "zope.event==4.5.0",
