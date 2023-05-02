@@ -10,7 +10,7 @@ setup(
         "click==8.1.3",
         "commonmark==0.9.1",
         "Deprecated==1.2.13",
-        "Flask==2.2.2",
+        "Flask==2.3.2",
         "Flask-Limiter==2.6.3",
         "Flask-SQLAlchemy==2.5.1",
         "gevent==21.12.0",
