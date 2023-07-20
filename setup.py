@@ -22,7 +22,7 @@ setup(
         "MarkupSafe==2.1.1",
         "packaging==21.3",
         "psycopg2-binary==2.9.3",
-        "Pygments==2.13.0",
+        "Pygments==2.15.0",
         "pymemcache==3.5.2",
         "pyparsing==3.0.9",
         "pytz==2022.2.1",
