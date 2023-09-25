@@ -13,7 +13,7 @@ setup(
         "Flask==2.2.5",
         "Flask-Limiter==2.6.3",
         "Flask-SQLAlchemy==2.5.1",
-        "gevent==21.12.0",
+        "gevent==23.9.1",
         "greenlet==1.1.3",
         "importlib-metadata==4.12.0",
         "itsdangerous==2.1.2",
