@@ -6,7 +6,7 @@ import typing
 
 import psycopg2
 import pytz
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, send_from_directory
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_sqlalchemy import SQLAlchemy
@@ -188,3 +188,12 @@ def view_date(date_nyc):
 def health():
     """Health check endpoint."""
     return "OK"
+
+
+@app.route("/favicon.ico")
+def favicon():
+    return send_from_directory(
+        os.path.join(app.root_path, "static"),
+        "favicon.ico",
+        mimetype="image/vnd.microsoft.icon",
+    )
